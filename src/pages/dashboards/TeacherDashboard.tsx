@@ -493,10 +493,17 @@ const TeacherDashboard = () => {
                       <p className="text-sm mb-4">{leave.reason}</p>
                       {leave.status === 'pending' && (
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={() => handleApproveLeave(leave.id, 'approved')} className="bg-green-500 hover:bg-green-600">Approve</Button>
-                          <Button size="sm" variant="destructive" onClick={() => handleApproveLeave(leave.id, 'rejected')}>Reject</Button>
+                          <Button size="sm" onClick={() => handleApproveLeave(leave.id, 'approved')} className="bg-green-500 hover:bg-green-600">
+                            Approve & Notify Parent
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleApproveLeave(leave.id, 'rejected')}>
+                            Reject
+                          </Button>
                         </div>
                       )}
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {leave.status === 'approved' && "✓ Parent notified via SMS"}
+                      </div>
                     </div>
                   ))}
                 </div>

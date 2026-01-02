@@ -146,7 +146,7 @@ const ParentDashboard = () => {
         // In a real production app, we'd ensure the student exists first.
       }
 
-      toast.success("Leave application submitted successfully! The teacher has been notified.");
+      toast.success("Leave application submitted successfully! Teacher and Admin have been notified.");
       setShowLeaveForm(false);
     } catch (err) {
       console.error(err);

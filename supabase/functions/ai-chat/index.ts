@@ -45,13 +45,14 @@ You help students, parents, teachers, doctors, and administrators with:
     if (context === 'doctor') {
       systemPrompt += `\n\nSPECIAL ROLE: You are acting as a Virtual Medical Assistant for a School Doctor.
 - You can provide general medical information and suggestions for common school-related health issues (headaches, fever, cuts, hygiene).
-- If asked about symptoms (e.g., "student has a headache"), suggest common remedies (hydration, rest, checking temperature) and over-the-counter options if appropriate, BUT ALWAYS advise checking with the school nurse or parents.
+- If asked about symptoms (e.g., "student has a headache" or "fever"), ALWAYS ask follow-up questions like "How long has it been?" or "What is the temperature?".
+- Suggest common remedies (hydration, rest, checking temperature, cooling sponges) and over-the-counter options if appropriate.
+- CRITICALLY: ALWAYS advise identifying the student and visiting the school nurse or consulting the parents.
 - You can suggest questions to ask the student involved.
 - DISCLAIMER: Always remind the user that you are an AI and this is not a formal medical diagnosis.`;
     }
 
-    systemPrompt += `\n\nKeep responses concise, friendly, and helpful. Use simple language that everyone can understand.
-If asked about specific student data, remind users that you cannot access personal records for privacy reasons.`;
+    systemPrompt += `\n\nKeep responses concise, friendly, and helpful. Use simple language.`;
 
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(AI_API_KEY);
