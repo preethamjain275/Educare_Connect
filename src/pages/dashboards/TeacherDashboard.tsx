@@ -59,10 +59,27 @@ const TeacherDashboard = () => {
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [activeView, setActiveView] = useState<"attendance" | "marks" | "alerts" | "leaves" | "tests">("attendance");
   const [leaveRequests, setLeaveRequests] = useState<any[]>([]);
+  const [editingMark, setEditingMark] = useState<any>(null);
 
   useEffect(() => {
     fetchLeaveRequests();
   }, []);
+
+  const handleOpenMarksModal = (studentId?: number) => {
+    if (studentId) {
+      const student = students.find(s => s.id === studentId);
+      setEditingMark({
+        studentId: studentId,
+        studentName: student?.name,
+        subject: "Mathematics", // Default or mock
+        marks: student?.marks || 0,
+        type: "Mid Term"
+      });
+    } else {
+      setEditingMark(null);
+    }
+    setShowMarksForm(true);
+  };
 
   const fetchLeaveRequests = async () => {
     const { data, error } = await supabase
@@ -143,7 +160,16 @@ const TeacherDashboard = () => {
 
   const handleSaveMarks = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Marks saved successfully!");
+    if (editingMark) {
+      // Update logic (mock)
+      const updatedStudents = students.map(s =>
+        s.id === Number(editingMark.studentId) ? { ...s, marks: Number(editingMark.marks) } : s
+      );
+      setStudents(updatedStudents);
+      toast.success("Marks updated successfully!");
+    } else {
+      toast.success("Marks saved successfully!");
+    }
     setShowMarksForm(false);
   };
 
@@ -390,7 +416,7 @@ const TeacherDashboard = () => {
                           </div>
                         </td>
                         <td className="py-4 px-4 text-center">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleOpenMarksModal(student.id)}>
                             <FiEdit3 className="w-4 h-4" />
                           </Button>
                         </td>
@@ -626,7 +652,7 @@ const TeacherDashboard = () => {
                 className="bg-card rounded-2xl p-6 w-full max-w-md shadow-2xl border border-border"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold">Enter Marks</h3>
+                  <h3 className="text-xl font-bold">{editingMark ? "Edit Marks" : "Enter Marks"}</h3>
                   <Button variant="ghost" size="sm" onClick={() => setShowMarksForm(false)}>
                     <FiX className="w-5 h-5" />
                   </Button>
@@ -634,7 +660,13 @@ const TeacherDashboard = () => {
                 <form onSubmit={handleSaveMarks} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">Select Student</label>
-                    <select className="w-full px-4 py-2.5 rounded-xl border border-border bg-background">
+                    <select
+                      className="w-full px-4 py-2.5 rounded-xl border border-border bg-background"
+                      value={editingMark?.studentId || ""}
+                      onChange={(e) => setEditingMark({ ...editingMark, studentId: e.target.value })}
+                      disabled={!!editingMark} // Disable student change if editing specific
+                    >
+                      <option value="">-- Select Student --</option>
                       {students.map((s) => (
                         <option key={s.id} value={s.id}>{s.name} ({s.sr})</option>
                       ))}
@@ -660,14 +692,22 @@ const TeacherDashboard = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Marks (out of 100)</label>
-                    <Input type="number" min="0" max="100" placeholder="Enter marks" required />
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      placeholder="Enter marks"
+                      required
+                      value={editingMark?.marks || ""}
+                      onChange={(e) => setEditingMark({ ...editingMark, marks: e.target.value })}
+                    />
                   </div>
                   <div className="flex gap-3 pt-4">
                     <Button type="button" variant="outline" onClick={() => setShowMarksForm(false)} className="flex-1">
                       Cancel
                     </Button>
                     <Button type="submit" className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600">
-                      Save Marks
+                      {editingMark ? "Update Marks" : "Save Marks"}
                     </Button>
                   </div>
                 </form>

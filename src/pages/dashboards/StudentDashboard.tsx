@@ -74,11 +74,12 @@ const StudentDashboard = () => {
 
   const handleHealthUpdate = (status: "fine" | "notwell") => {
     setHealthStatus(status);
-    toast.success(
-      status === "fine"
-        ? "Great! Your health status has been updated."
-        : "We've noted your status. A health officer will be notified."
-    );
+    if (status === "fine") {
+      toast.success("Great! Your health status has been updated.");
+    } else {
+      toast.error("Alert sent to School Doctor & Parents. Please visit the medical room immediately.");
+      // In a real app, this would trigger an API call to send SMS/Email
+    }
   };
 
   const handleRegisterEvent = (eventId: number) => {
