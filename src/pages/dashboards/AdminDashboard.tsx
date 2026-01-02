@@ -265,17 +265,97 @@ const AdminDashboard = () => {
     reader.readAsText(file);
   };
 
-  const handleExportData = () => {
+  const handleFullBackup = () => {
     const data = dataManager.exportData();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `educare_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `educare_full_backup_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    toast.success("Data export initiated.");
+    toast.success("Full system backup initiated.");
+  };
+
+  const downloadCSV = (filename: string, header: string[], rows: string[][]) => {
+    const csvContent = [
+      header.join(","),
+      ...rows.map(row => row.map(cell => `"${(cell || "").replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownloadReport = (type: string) => {
+    const allUsers = dataManager.getUsers();
+
+    if (type === "Full Backup") {
+      handleFullBackup();
+      return;
+    }
+
+    if (type === "Student Records") {
+      const students = allUsers.filter(u => u.role === "Student");
+      const header = ["ID", "Name", "SRN", "Email", "Password", "Phone", "Route No", "Driver Phone", "Status", "Joined"];
+      const rows = students.map(s => [
+        s.id.toString(), s.name, s.srn || "N/A", s.email, s.password || "", s.phone || "",
+        s.routeNumber || "", s.vanDriverPhone || "", s.status, s.joined
+      ]);
+      downloadCSV("student_report", header, rows);
+      toast.success("Student report downloaded.");
+    }
+    else if (type === "Parent Details") { // Renamed from "Parent" implicit logic
+      const parents = allUsers.filter(u => u.role === "Parent");
+      const header = ["Parent ID", "Parent Name", "Parent Email", "Parent Password", "Phone", "Linked Child SRN", "Child Name", "Status"];
+      const rows = parents.map(p => {
+        const child = allUsers.find(u => u.role === "Student" && u.srn === p.linkedSrn);
+        return [
+          p.id.toString(), p.name, p.email, p.password || "", p.phone || "",
+          p.linkedSrn || "N/A", child ? child.name : "Unknown/Not Found", p.status
+        ];
+      });
+      downloadCSV("parent_report", header, rows);
+      toast.success("Parent report downloaded.");
+    }
+    else if (type === "Teacher List") {
+      const teachers = allUsers.filter(u => u.role === "Teacher");
+      const header = ["ID", "Name", "Email", "Password", "Phone", "Status", "Joined"];
+      const rows = teachers.map(t => [
+        t.id.toString(), t.name, t.email, t.password || "", t.phone || "", t.status, t.joined
+      ]);
+      downloadCSV("teacher_report", header, rows);
+      toast.success("Teacher report downloaded.");
+    }
+    else if (type === "Event Report") {
+      const allEvents = dataManager.getEvents();
+      const header = ["ID", "Event Title", "Date", "Type", "Description", "Registered Students Count", "Link"];
+      const rows = allEvents.map(e => [
+        e.id.toString(), e.title, e.date, e.type, e.description, (e.registeredStudents?.length || 0).toString(), e.link || ""
+      ]);
+      downloadCSV("event_report", header, rows);
+      toast.success("Event report downloaded.");
+    }
+    else if (type === "Doctor Details") {
+      const doctors = allUsers.filter(u => u.role === "Doctor");
+      const header = ["ID", "Name", "Email", "Password", "Phone", "Status", "Joined"];
+      const rows = doctors.map(d => [
+        d.id.toString(), d.name, d.email, d.password || "", d.phone || "", d.status, d.joined
+      ]);
+      downloadCSV("doctor_report", header, rows);
+      toast.success("Doctor report downloaded.");
+    }
+    else {
+      // Default fallback or "Health Records" which we don't really have data for yet
+      toast.info("Report type not fully implemented yet.");
+    }
   };
 
   const handleResetData = () => {
@@ -312,7 +392,7 @@ const AdminDashboard = () => {
                 <FiUpload className="w-4 h-4" />
                 Import Data
               </Button>
-              <Button onClick={handleExportData} variant="outline" size="sm" className="gap-2 hidden md:flex">
+              <Button onClick={handleFullBackup} variant="outline" size="sm" className="gap-2 hidden md:flex">
                 <FiDownload className="w-4 h-4" />
                 Export Data
               </Button>
@@ -672,16 +752,16 @@ const AdminDashboard = () => {
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[
-                    { label: "Student Records", desc: "All student data with marks and attendance" },
+                    { label: "Student Records", desc: "All student data including SRN and routes" },
+                    { label: "Parent Details", desc: "List of parents with linked children" },
                     { label: "Teacher List", desc: "Complete teacher directory" },
-                    { label: "Health Records", desc: "Student health and vaccination data" },
+                    { label: "Doctor Details", desc: "List of doctors" },
                     { label: "Event Report", desc: "All events with registration details" },
-                    { label: "Attendance Report", desc: "Monthly attendance summary" },
-                    { label: "Full Backup", desc: "Complete system data backup" },
+                    { label: "Full Backup", desc: "Complete system data backup (JSON)" },
                   ].map((item) => (
                     <button
                       key={item.label}
-                      onClick={handleExportData}
+                      onClick={() => handleDownloadReport(item.label)}
                       className="p-4 rounded-xl border border-border hover:bg-muted/50 transition-colors text-left"
                     >
                       <div className="flex items-center gap-3 mb-2">
