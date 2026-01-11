@@ -80,6 +80,64 @@ EduCare Connect is a modern educational management system designed to streamline
 - **Embla Carousel** – UI carousels
 - **Vaul** – Mobile drawer components
 
+
+
+**🔐 EduCare Connect – Login Credentials**
+
+---
+
+**👨‍💼 Admin Portal**
+📧 Email: `admin@example.com`
+🔑 Password: `password123`
+
+---
+
+**🎓 Student Portal**
+(Login using **SRN**)
+
+* **Preetham Jain**
+  SRN: `24Suube001`
+  Password: `password123`
+  Status: Active
+
+---
+
+**👪 Parent Portal**
+(Parents log in using Email and can view child data using SRN)
+
+* **Sarah Smith**
+  📧 Email: `sarah@parent.com`
+  🔑 Password: `password123`
+  👶 Linked Child SRN: `24Suube001` (**Preetham Jain**)
+
+---
+
+**👩‍🏫 Teacher Portal**
+
+* **Mr. Williams**
+  📧 Email: `williams@teacher.edu`
+  🔑 Password: `password123`
+
+* **Mrs. Taylor**
+  📧 Email: `taylor@teacher.edu`
+  🔑 Password: `password123`
+
+---
+
+**🩺 Doctor (Health Officer) Portal**
+
+* **Dr. Brown**
+  📧 Email: `brown@doctor.edu`
+  🔑 Password: `password123`
+
+---
+
+**📝 Notes:**
+
+* **Forgot Password OTP:** `123456` (for testing only)
+* **New Users:** Default password is `password123`
+
+
 ## 📊 Database Schema
 
 ### Core Tables
